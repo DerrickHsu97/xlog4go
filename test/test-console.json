@@ -1,0 +1,12 @@
+{
+    "LogLevel" : "info",
+
+    "FileWriter" : {
+        "On": false
+    },
+
+    "ConsoleWriter" : {
+        "On" : true,
+        "Color":true
+    }
+}
