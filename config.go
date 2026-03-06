@@ -1,4 +1,4 @@
-package dlog4go
+package xlog4go
 
 import (
 	"encoding/json"

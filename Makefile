@@ -1,4 +1,4 @@
-PKG := git.xiaojukeji.com/shield-arch/dlog4go
+PKG := github.com/DerrickHsu97/xlog4go
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/ |grep -v example)
 
 atest:
