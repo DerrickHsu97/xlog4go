@@ -1,7 +1,7 @@
 package main
 
 import (
-	logger "git.xiaojukeji.com/shield-arch/dlog4go"
+	logger "github.com/DerrickHsu97/xlog4go"
 
 	"time"
 )
