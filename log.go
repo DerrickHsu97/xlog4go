@@ -62,7 +62,11 @@ type Logger struct {
 }
 
 func NewLogger() *Logger {
-	if logger_default != nil && !takeup {
+	return NewLoggerWithName("")
+}
+
+func NewLoggerWithName(name string) *Logger {
+	if name == "" && logger_default != nil && !takeup {
 		takeup = true
 		return logger_default
 	}
@@ -75,6 +79,10 @@ func NewLogger() *Logger {
 	l.layout = "2006-01-02T15:04:05.000+0800"
 
 	go boostrapLogWriter(l)
+
+	if name != "" {
+		RegisterLogger(name, l)
+	}
 
 	return l
 }
@@ -245,6 +253,8 @@ func boostrapLogWriter(logger *Logger) {
 var (
 	logger_default *Logger
 	takeup         = false
+	loggers        = make(map[string]*Logger)
+	loggersMu      sync.RWMutex
 )
 
 func SetLevel(lvl int) {
@@ -297,6 +307,21 @@ func Close() {
 
 func GetLogger() *Logger {
 	return logger_default
+}
+
+func GetLoggerByName(name string) *Logger {
+	loggersMu.RLock()
+	defer loggersMu.RUnlock()
+	if l, ok := loggers[name]; ok {
+		return l
+	}
+	return logger_default
+}
+
+func RegisterLogger(name string, l *Logger) {
+	loggersMu.Lock()
+	defer loggersMu.Unlock()
+	loggers[name] = l
 }
 
 func init() {

@@ -1,0 +1,60 @@
+{
+    "Default": {
+        "LogLevel": "info",
+        "FileWriter": {
+            "On": true,
+            "LogPath": "./logs/app.log",
+            "RotateLogPath": "./logs/app.log.%Y%m%d",
+            "WfLogPath": "./logs/app.wf.log",
+            "RotateWfLogPath": "./logs/app.wf.log.%Y%m%d"
+        },
+        "ConsoleWriter": {
+            "On": true,
+            "Color": true
+        }
+    },
+    "Loggers": [
+        {
+            "Name": "gorm",
+            "Config": {
+                "LogLevel": "debug",
+                "FileWriter": {
+                    "On": true,
+                    "LogPath": "./logs/gorm.log",
+                    "RotateLogPath": "./logs/gorm.log.%Y%m%d"
+                },
+                "ConsoleWriter": {
+                    "On": false
+                }
+            }
+        },
+        {
+            "Name": "redis",
+            "Config": {
+                "LogLevel": "debug",
+                "FileWriter": {
+                    "On": true,
+                    "LogPath": "./logs/redis.log",
+                    "RotateLogPath": "./logs/redis.log.%Y%m%d"
+                },
+                "ConsoleWriter": {
+                    "On": false
+                }
+            }
+        },
+        {
+            "Name": "access",
+            "Config": {
+                "LogLevel": "info",
+                "FileWriter": {
+                    "On": true,
+                    "LogPath": "./logs/access.log",
+                    "RotateLogPath": "./logs/access.log.%Y%m%d"
+                },
+                "ConsoleWriter": {
+                    "On": false
+                }
+            }
+        }
+    ]
+}

@@ -27,6 +27,16 @@ type LogConfig struct {
 	CW    ConfConsoleWriter `json:"ConsoleWriter"`
 }
 
+type NamedLogConfig struct {
+	Name   string     `json:"Name"`
+	Config LogConfig  `json:"Config"`
+}
+
+type MultiLogConfig struct {
+	Default LogConfig        `json:"Default"`
+	Loggers []NamedLogConfig `json:"Loggers"`
+}
+
 func SetupLogWithConf(file string) (err error) {
 	var lc LogConfig
 
@@ -39,6 +49,38 @@ func SetupLogWithConf(file string) (err error) {
 		return err
 	}
 
+	return setupLogger(logger_default, lc)
+}
+
+func SetupMultiLogWithConf(file string) (err error) {
+	var mlc MultiLogConfig
+
+	cnt, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(cnt, &mlc); err != nil {
+		return err
+	}
+
+	// Setup default logger
+	if err = setupLogger(logger_default, mlc.Default); err != nil {
+		return err
+	}
+
+	// Setup named loggers
+	for _, namedConf := range mlc.Loggers {
+		l := NewLoggerWithName(namedConf.Name)
+		if err = setupLogger(l, namedConf.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func setupLogger(l *Logger, lc LogConfig) error {
 	if lc.FW.On {
 		if len(lc.FW.LogPath) > 0 {
 			w := NewFileWriter()
@@ -50,7 +92,7 @@ func SetupLogWithConf(file string) (err error) {
 			} else {
 				w.SetLogLevelCeil(ERROR)
 			}
-			Register(w)
+			l.Register(w)
 		}
 
 		if len(lc.FW.WfLogPath) > 0 {
@@ -59,7 +101,7 @@ func SetupLogWithConf(file string) (err error) {
 			wfw.SetPathPattern(lc.FW.RotateWfLogPath)
 			wfw.SetLogLevelFloor(WARNING)
 			wfw.SetLogLevelCeil(ERROR)
-			Register(wfw)
+			l.Register(wfw)
 		}
 
 		if len(lc.FW.PublicLogPath) > 0 {
@@ -68,40 +110,40 @@ func SetupLogWithConf(file string) (err error) {
 			public.SetPathPattern(lc.FW.RotatePublicLogPath)
 			public.SetLogLevelFloor(PUBLIC)
 			public.SetLogLevelCeil(PUBLIC)
-			Register(public)
+			l.Register(public)
 		}
 	}
 
 	if lc.CW.On {
 		w := NewConsoleWriter()
 		w.SetColor(lc.CW.Color)
-		Register(w)
+		l.Register(w)
 	}
 
 	switch lc.Level {
 	case "public":
-		SetLevel(PUBLIC)
+		l.SetLevel(PUBLIC)
 
 	case "trace":
-		SetLevel(TRACE)
+		l.SetLevel(TRACE)
 
 	case "debug":
-		SetLevel(DEBUG)
+		l.SetLevel(DEBUG)
 
 	case "info":
-		SetLevel(INFO)
+		l.SetLevel(INFO)
 
 	case "warning":
-		SetLevel(WARNING)
+		l.SetLevel(WARNING)
 
 	case "error":
-		SetLevel(ERROR)
+		l.SetLevel(ERROR)
 
 	case "fatal":
-		SetLevel(FATAL)
+		l.SetLevel(FATAL)
 
 	default:
-		err = errors.New("Invalid log level")
+		return errors.New("Invalid log level")
 	}
-	return
+	return nil
 }
